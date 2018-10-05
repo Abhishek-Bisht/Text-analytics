@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Mon Oct  1 11:56:06 2018
+
+@author: u343230
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Wed Sep 26 13:58:37 2018
 
 @author: u343230
@@ -8,14 +15,14 @@ Created on Wed Sep 26 13:58:37 2018
 -----------  Downloading all the required packages---------------
 '''
 # for lemmatization
-import spacy
+
 '''
 Other Spacy models which can be imported based on model performance
 en_core_web_md, en_core_web_lg, en_vectors_web_lg
 '''
+import spacy
 import en_core_web_sm      #Basic Spacy model for English
 nlp = en_core_web_sm.load()
-
 
 import nltk
 
@@ -48,35 +55,59 @@ import warnings
 warnings.filterwarnings("ignore",category=DeprecationWarning)
 
 
+s_df = pd.read_json('https://raw.githubusercontent.com/selva86/datasets/master/newsgroups.json')
 
-from nltk.corpus import stopwords
-stop_words = stopwords.words('english')
+
+#data = pd.read_csv("C:/Abhishek/work/Twitter POC/Apple_self_drive_car.csv",encoding='latin-1')
+
+print(s_df.target_names.unique())
+print(s_df.target.unique())
+
+# Convert to list
+s_data_list = s_df.content.values.tolist()
+s_data=[]
+for text in s_data_list:
+    s_data.append(text.lower())
+# Remove Emails
+s_data = [re.sub('\S*@\S*\s?', '', sent) for sent in s_data]
+
+# Remove new line characters
+s_data = [re.sub('\s+', ' ', sent) for sent in s_data]
+
+# Remove distracting single quotes
+s_data = [re.sub("\'", "", sent) for sent in s_data]
+
+doc=nlp(s_data[1])
+for token in doc:
+    print(token.text + ' ',token.is_stop)
+
+#token.is_punct,token.is_space
+s_data_2=[]
+for tok in s_data:
+    tok=nlp(tok)
+    for token in tok:
+        if token.is_stop == False:
+            if token.is_punct == False:
+                if token.is_space == False:
+                    s_data_2.append(token.text)
+
+#s_text=nlp(s_data)
+s_data_words=[]
+s_sentence_words=[]
+for text in s_data_2:
+    s_text=nlp(text.lower())
+    for token in s_text:
+        s_data_words.append(token.text)
+    s_sentence_words.append(s_data_words)
+    s_data_words=[]
+
+
+#from nltk.corpus import stopwords
+#stop_words = stopwords.words('english')
 
 # based on input data
 stop_words.extend(['from', 'subject', 're', 'edu', 'use'])
 
-#data = pd.read_csv("C:/Abhishek/work/Twitter POC/Apple_self_drive_car.csv",encoding='latin-1')
-
-df = pd.read_json('https://raw.githubusercontent.com/selva86/datasets/master/newsgroups.json')
-
-print(df.target_names.unique())
-print(df.target.unique())
-
-df.head()
-
-# Convert to list
-data = df.content.values.tolist()
-
-# Remove Emails
-data = [re.sub('\S*@\S*\s?', '', sent) for sent in data]
-
-# Remove new line characters
-data = [re.sub('\s+', ' ', sent) for sent in data]
-
-# Remove distracting single quotes
-data = [re.sub("\'", "", sent) for sent in data]
-
-pprint(data[:1])
 
 data_words=[]
 for sentence in data:
